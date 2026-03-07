@@ -9,9 +9,16 @@ import { getVelibStation } from '../api/velibService.js';
 
 export const velibModule = {
   async fetch(context, apiKey) {
-    const { stationId } = context;
+    const { stationId, docksStationId } = context;
     if (!stationId) throw new Error('stationId manquant dans la config du module Vélib');
-    return getVelibStation(stationId, apiKey);
+    const [main, docks] = await Promise.all([
+      getVelibStation(stationId, apiKey),
+      docksStationId ? getVelibStation(docksStationId, apiKey) : null,
+    ]);
+    if (docks) {
+      return { ...main, docksAvailable: docks.docksAvailable, docksCapacity: docks.capacity, docksStationName: docks.name };
+    }
+    return main;
   },
 
   render(data) {
@@ -20,7 +27,8 @@ export const velibModule = {
       : `<div class="status-pill pill-err"><span class="dot"></span>Hors service</div>`;
 
     const mechLevel  = data.capacity > 0 ? Math.round((data.mechanical / data.capacity) * 100) : 0;
-    const docksLevel = data.capacity > 0 ? Math.round((data.docksAvailable / data.capacity) * 100) : 0;
+    const docksCap   = data.docksCapacity ?? data.capacity;
+    const docksLevel = docksCap > 0 ? Math.round((data.docksAvailable / docksCap) * 100) : 0;
 
     const mechClass  = data.mechanical <= 2    ? 'level-low' : data.mechanical <= 5 ? 'level-mid' : 'level-ok';
     const docksClass = data.docksAvailable <= 2 ? 'level-low' : data.docksAvailable <= 5 ? 'level-mid' : 'level-ok';
@@ -52,14 +60,12 @@ export const velibModule = {
 
             <div class="velib-stat">
               <div class="velib-count ${docksClass}">${data.docksAvailable}</div>
-              <div class="velib-label">Places libres</div>
+              <div class="velib-label">Places libres${data.docksStationName ? ` · ${data.docksStationName}` : ''}</div>
               <div class="velib-bar-wrap">
                 <div class="velib-bar-fill ${docksClass}" style="width:${docksLevel}%"></div>
               </div>
             </div>
           </div>
-
-          <div class="velib-capacity">Capacité totale : ${data.capacity} bornettes</div>
         </div>
       </div>`;
   },

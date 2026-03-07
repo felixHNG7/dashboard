@@ -21,7 +21,10 @@ export const DASHBOARD_CONFIG = {
       type:    'velib',
       enabled: true,
       layout:  'col-left row-bottom', // bloc bas droite
-      params:  { stationId: '47001' },
+      params:  {
+        stationId:    '47001',  // vélos mécaniques
+        docksStationId: '40008', // places libres (station distincte)
+      },
     },
 
     // ── Colonne droite ─────────────────────────────────────────────
