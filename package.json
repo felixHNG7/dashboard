@@ -1,0 +1,16 @@
+{
+  "name": "transport-dashboard",
+  "version": "1.0.0",
+  "description": "Dashboard temps réel IDF Mobilités — RER D & Métro 9",
+  "type": "module",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "dotenv": "^16.3.1",
+    "node-fetch": "^3.3.2"
+  }
+}
