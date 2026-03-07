@@ -9,24 +9,24 @@ import { getNextDepartures } from '../api/departuresService.js';
 
 export const nextDeparturesModule = {
   async fetch(context, apiKey) {
-    const { line, stop, directionKeyword = '', count = 3 } = context;
+    const { line, stop, platformName = '', count = 3 } = context;
     return getNextDepartures(
-      stop.id, line.id, directionKeyword, count, apiKey,
+      stop.id, line.id, platformName, count, apiKey,
       { omitLineRef: !!stop.omitLineRef }
     );
   },
 
   render(data, context) {
-    const { line, stop, directionKeyword, count } = context;
+    const { line, stop, platformName, count } = context;
     const { departures } = data;
 
-    const subtitle = directionKeyword
-      ? `${stop.label} → ${directionKeyword}`
+    const subtitle = platformName
+      ? `${stop.label} — Quai ${platformName}`
       : stop.label;
 
     const listHtml = departures.length
       ? departures.map((d, i) => renderDepartureRow(d, i)).join('')
-      : `<div class="state-message">Aucun passage trouvé dans cette direction.</div>`;
+      : `<div class="state-message">Aucun passage trouvé sur ce quai.</div>`;
 
     const pillLabel = departures.length
       ? `${departures.length} train${departures.length > 1 ? 's' : ''}`

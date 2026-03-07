@@ -28,14 +28,14 @@ import { primGet } from './primClient.js';
  * Récupère les prochains passages à un arrêt pour une ligne donnée.
  * @param {string} stopRef           - MonitoringRef STIF
  * @param {string} lineRef           - LineRef STIF
- * @param {string} directionKeyword  - filtre sur le nom de destination (ex: 'LYON')
+ * @param {string} platformName      - filtre sur DeparturePlatformName (ex: '2B')
  * @param {number} count             - nombre max de résultats
  * @param {string} apiKey
  * @param {object} options
  * @param {boolean} options.omitLineRef - si true, ne passe pas LineRef à l'API (requis pour gares SNCF depuis 03/2025)
  * @returns {Promise<DeparturesResult>}
  */
-export async function getNextDepartures(stopRef, lineRef, directionKeyword, count, apiKey, { omitLineRef = false } = {}) {
+export async function getNextDepartures(stopRef, lineRef, platformName, count, apiKey, { omitLineRef = false } = {}) {
   // ⚠️ Depuis mars 2025, l'API PRIM rejette le paramètre LineRef
   //    pour les gares SNCF. On le filtre côté client à la place.
   const params = omitLineRef
@@ -60,15 +60,19 @@ export async function getNextDepartures(stopRef, lineRef, directionKeyword, coun
   // Fallback si aucun résultat après filtrage (format lineRef inattendu)
   const linePool = byLine.length ? byLine : visits;
 
-  // ── Filtrage directionnel ──────────────────────────────────────
-  const filtered = directionKeyword
+  // ── Filtrage par quai (DeparturePlatformName) ────────────────────
+  const getPlatformName = (call) => {
+    const raw = call?.DeparturePlatformName;
+    if (typeof raw === 'string') return raw.trim();
+    if (raw?.value) return String(raw.value).trim();
+    if (Array.isArray(raw) && raw[0]?.value) return String(raw[0].value).trim();
+    return '';
+  };
+  const filtered = platformName
     ? linePool.filter(v => {
-        const journey = v?.MonitoredVehicleJourney;
-        const dest    = (journey?.DestinationName?.[0]?.value || '').toUpperCase();
-        const dir     = (journey?.DirectionRef?.value || '').toUpperCase();
-        return dest.includes(directionKeyword.toUpperCase())
-          || dir.includes('1')
-          || dir.includes('PARIS');
+        const call   = v?.MonitoredVehicleJourney?.MonitoredCall;
+        const plat   = getPlatformName(call);
+        return plat && plat.toUpperCase() === String(platformName).trim().toUpperCase();
       })
     : linePool;
 

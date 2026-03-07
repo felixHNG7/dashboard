@@ -10,10 +10,10 @@ export const DASHBOARD_CONFIG = {
       enabled: true,
       layout:  'col-left row-top',    // grand bloc haut gauche
       params: {
-        lineKey:          'RERD',
-        stopKey:          'MAISONS_ALFORT_ALFORTVILLE',
-        directionKeyword: 'Paris Gare de Lyon',
-        count:            4,
+        lineKey:     'RERD',
+        stopKey:     'MAISONS_ALFORT_ALFORTVILLE',
+        platformName: '2B',
+        count:       4,
       },
     },
     {

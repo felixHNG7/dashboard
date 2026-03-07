@@ -31,9 +31,17 @@ function extractMessages(delivery) {
     const content = msg?.Content;
     if (!content) continue;
 
+    // Filtre au niveau Content : n'afficher que SHORT_MESSAGE (exclure TEXT_ONLY)
+    const contentMsgType = (content?.MessageType ?? content?.messageType ?? '').toUpperCase();
+    if (contentMsgType === 'TEXT_ONLY') continue;
+
     // ── Forme 1 : Content.Message[].MessageText.value (SIRI-lite standard IDFM) ──
     const msgArray = [].concat(content.Message || []);
     for (const m of msgArray) {
+      // Filtre : n'afficher que SHORT_MESSAGE (exclure TEXT_ONLY)
+      const msgType = (m?.MessageType ?? m?.messageType ?? '').toUpperCase();
+      if (msgType === 'TEXT_ONLY') continue;
+
       // MessageText peut être un objet {value, lang} ou directement une string
       const val = m?.MessageText?.value ?? m?.MessageText ?? m?.value ?? null;
       if (typeof val === 'string' && val.trim()) {

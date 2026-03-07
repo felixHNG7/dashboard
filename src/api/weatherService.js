@@ -93,11 +93,11 @@ export async function getWeather(lat, lon) {
     .slice(baseIdx + 1, baseIdx + 4)
     .reduce((s, v) => s + (v ?? 0), 0);
 
-  // ── Prévisions toutes les 3h sur 5 points ────────────────────────
+  // ── Prévisions toutes les 2h sur 6 points ────────────────────────
   // On lit les timestamps hourly directement : "YYYY-MM-DDTHH:MM" → "HHh"
   const forecasts = [];
-  for (let i = 1; i <= 5; i++) {
-    const idx = baseIdx + i * 3;
+  for (let i = 1; i <= 6; i++) {
+    const idx = baseIdx + i * 2;
     if (!hourly.time[idx]) break;
     const timeStr = hourly.time[idx]; // "2026-03-05T17:00"
     const hh      = timeStr.slice(11, 13) + 'h'; // "17h"
