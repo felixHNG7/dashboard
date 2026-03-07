@@ -44,7 +44,7 @@ export const velibModule = {
               <div class="velib-count ">${data.mechanical}</div>
               <div class="velib-label">Mécaniques</div>
               <div class="velib-bar-wrap">
-                <div class="velib-bar-fill " style="width:${mechLevel}%"></div>
+                <div class="velib-bar-fill ${mechClass}" style="width:${mechLevel}%"></div>
               </div>
             </div>
 

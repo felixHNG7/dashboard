@@ -80,12 +80,14 @@ export async function getWeather(lat, lon) {
   const hourly = data.hourly;
 
   // ── Valeurs actuelles : directement depuis data.current ──────────
-  // data.current.time est au format "YYYY-MM-DDTHH:MM" (heure locale Paris)
-  const currentTimeStr = cur.time; // ex: "2026-03-05T14:00"
+  // current.time peut être "2026-03-05T14:00" ou "2026-03-05T23:15" (avec minutes)
+  // hourly.time n'a que des heures pleines "2026-03-05T14:00" → on normalise
+  const currentTimeStr = cur.time;
+  const currentHourSlot = currentTimeStr.slice(0, 13) + ':00'; // "2026-03-05T23:15" → "2026-03-05T23:00"
+  const todayDate      = currentTimeStr.slice(0, 10);
 
-  // ── Index horaire : on trouve la position de l'heure courante ────
-  // On compare les strings directement — pas de conversion Date, pas d'offset.
-  const currentHourIdx = hourly.time.indexOf(currentTimeStr);
+  // ── Index horaire : crénau horaire contenant l'heure actuelle ─────
+  const currentHourIdx = hourly.time.indexOf(currentHourSlot);
   const baseIdx = currentHourIdx >= 0 ? currentHourIdx : 0;
 
   // ── Pluie prévue dans les 3 prochaines heures ────────────────────
@@ -93,17 +95,32 @@ export async function getWeather(lat, lon) {
     .slice(baseIdx + 1, baseIdx + 4)
     .reduce((s, v) => s + (v ?? 0), 0);
 
-  // ── Prévisions toutes les 2h sur 6 points ────────────────────────
-  // On lit les timestamps hourly directement : "YYYY-MM-DDTHH:MM" → "HHh"
+  const JOURS = ['Dim.', 'Lun.', 'Mar.', 'Mer.', 'Jeu.', 'Ven.', 'Sam.'];
+  const [y, m, d] = todayDate.split('-').map(Number);
+  const tomorrow = new Date(y, m - 1, d + 1);
+  const tomorrowStr = `${tomorrow.getFullYear()}-${String(tomorrow.getMonth() + 1).padStart(2, '0')}-${String(tomorrow.getDate()).padStart(2, '0')}`;
+
+  const formatTimeLabel = (timeStr) => {
+    const forecastDate = timeStr.slice(0, 10);
+    const hour         = parseInt(timeStr.slice(11, 13), 10) || 0;
+    const hourStr      = `${hour}h`;
+    if (forecastDate === todayDate) return hourStr;
+    if (forecastDate === tomorrowStr) return `Demain ${hourStr}`;
+    const dayName = JOURS[new Date(forecastDate + 'T12:00:00').getDay()];
+    return `${dayName} ${hourStr}`;
+  };
+
+  // ── Prévisions toutes les 2h sur 6 points (à partir de l'heure actuelle) ──
+  // Date prise en compte : "Demain 0h" quand minuit est le lendemain
   const forecasts = [];
-  for (let i = 1; i <= 6; i++) {
+  for (let i = 0; i < 6; i++) {
     const idx = baseIdx + i * 2;
     if (!hourly.time[idx]) break;
-    const timeStr = hourly.time[idx]; // "2026-03-05T17:00"
-    const hh      = timeStr.slice(11, 13) + 'h'; // "17h"
-    const w       = decodeWmo(hourly.weather_code[idx] ?? 0);
+    const timeStr   = hourly.time[idx];
+    const timeLabel = formatTimeLabel(timeStr);
+    const w         = decodeWmo(hourly.weather_code[idx] ?? 0);
     forecasts.push({
-      time:   hh,
+      time:   timeLabel,
       temp:   Math.round(hourly.temperature_2m[idx] ?? 0),
       precip: Math.round((hourly.precipitation[idx] ?? 0) * 10) / 10,
       emoji:  w.emoji,

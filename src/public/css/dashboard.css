@@ -228,11 +228,39 @@ body {
 .velib-divider { width: 1px; height: 60px; background: var(--border); flex-shrink: 0; }
 .velib-count { font-family: 'DM Mono', monospace; font-size: 2.8rem; font-weight: 400; line-height: 1; }
 .velib-label { font-size: .75rem; color: var(--muted); text-transform: uppercase; letter-spacing: .07em; }
-.velib-bar-wrap { height: 5px; background: var(--border); border-radius: 4px; overflow: hidden; }
-.velib-bar-fill { height: 100%; border-radius: 4px; transition: width .6s ease; }
-.level-ok  .velib-count, .velib-stat.level-ok .velib-bar-fill { color: var(--green); background: var(--green); }
-.level-mid .velib-count, .velib-stat.level-mid .velib-bar-fill { color: var(--yellow); background: var(--yellow); }
-.level-low .velib-count, .velib-stat.level-low .velib-bar-fill { color: var(--red); background: var(--red); }
+.velib-bar-wrap {
+  height: 8px;
+  background: rgba(30, 30, 46, 0.6);
+  border-radius: 6px;
+  overflow: hidden;
+  border: 1px solid rgba(90, 90, 114, 0.4);
+  position: relative;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+.velib-bar-fill {
+  height: 100%;
+  border-radius: 5px;
+  transition: width .6s ease;
+  position: relative;
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.2);
+}
+.velib-bar-fill::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 5px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.25) 0%, transparent 50%);
+  pointer-events: none;
+}
+.level-ok  .velib-count,
+.velib-stat.level-ok .velib-bar-fill,
+.velib-bar-fill.level-ok { color: var(--green); background: var(--green); }
+.level-mid .velib-count,
+.velib-stat.level-mid .velib-bar-fill,
+.velib-bar-fill.level-mid { color: var(--yellow); background: var(--yellow); }
+.level-low .velib-count,
+.velib-stat.level-low .velib-bar-fill,
+.velib-bar-fill.level-low { color: var(--red); background: var(--red); }
 .velib-capacity { font-family: 'DM Mono', monospace; font-size: .68rem; color: var(--muted); text-align: center; }
 
 /* ── Footer ── */
