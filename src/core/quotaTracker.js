@@ -12,7 +12,7 @@ import { fileURLToPath } from 'url';
 
 const __dirname  = dirname(fileURLToPath(import.meta.url));
 const STATE_FILE = join(__dirname, '../../.quota-state.json');
-const DAILY_LIMIT = 1000; // quota PRIM clé gratuite
+const DAILY_LIMIT = 20000; // quota PRIM clé gratuite
 
 let state = loadState();
 
