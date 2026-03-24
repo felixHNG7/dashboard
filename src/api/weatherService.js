@@ -14,8 +14,13 @@
  */
 
 import fetch from 'node-fetch';
+import { HttpsProxyAgent } from 'https-proxy-agent';
 
 const BASE_URL = 'https://api.open-meteo.com/v1/forecast';
+
+// Réutiliser l'agent proxy si configuré
+const proxyUrl = process.env.HTTPS_PROXY || process.env.HTTP_PROXY;
+const proxyAgent = proxyUrl ? new HttpsProxyAgent(proxyUrl) : null;
 
 const WMO_CODES = {
   0:  { label: 'Ciel dégagé',          emoji: '☀️'  },
@@ -72,7 +77,7 @@ export async function getWeather(lat, lon) {
   ].join(','));
   url.searchParams.set('forecast_days', '2');
 
-  const res = await fetch(url.toString(), { signal: AbortSignal.timeout(8000) });
+  const res = await fetch(url.toString(), { signal: AbortSignal.timeout(8000), agent: proxyAgent });
   if (!res.ok) throw new Error(`Open-Meteo HTTP ${res.status}`);
   const data = await res.json();
 

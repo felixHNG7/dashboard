@@ -14,12 +14,14 @@ import { lineStatusModule }    from '../widgets/lineStatus.js';
 import { nextDeparturesModule } from '../widgets/nextDepartures.js';
 import { weatherModule }        from '../widgets/weather.js';
 import { velibModule }          from '../widgets/velib.js';
+import { tempoModule }          from '../widgets/tempo.js';
 
 export const REGISTRY = {
   'line-status':     lineStatusModule,
   'next-departures': nextDeparturesModule,
   'weather':         weatherModule,
   'velib':           velibModule,
+  'tempo':           tempoModule,
 };
 
 /**

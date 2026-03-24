@@ -21,7 +21,7 @@ export const nextDeparturesModule = {
     const { departures } = data;
 
     const subtitle = platformName
-      ? `${stop.label} — Quai ${platformName}`
+      ? `${stop.label}`
       : stop.label;
 
     const listHtml = departures.length
@@ -29,7 +29,7 @@ export const nextDeparturesModule = {
       : `<div class="state-message">Aucun passage trouvé sur ce quai.</div>`;
 
     const pillLabel = departures.length
-      ? `${departures.length} train${departures.length > 1 ? 's' : ''}`
+      ? formatWait(departures[0].minutesUntil)
       : 'Aucun';
     const pillClass = departures.length ? 'pill-ok' : 'pill-warn';
 
@@ -41,7 +41,6 @@ export const nextDeparturesModule = {
           </div>
           <div class="line-info">
             <h2>Prochains ${line.label}</h2>
-            <small>${subtitle}</small>
           </div>
           <div class="status-pill ${pillClass}">
             <span class="dot"></span>

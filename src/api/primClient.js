@@ -7,9 +7,14 @@
  */
 
 import fetch from 'node-fetch';
+import { HttpsProxyAgent } from 'https-proxy-agent';
 import { trackCalls } from '../core/quotaTracker.js';
 
 const PRIM_BASE_URL = 'https://prim.iledefrance-mobilites.fr/marketplace';
+
+// Créer un agent proxy si HTTPS_PROXY est configuré
+const proxyUrl = process.env.HTTPS_PROXY || process.env.HTTPS_PROXY;
+const proxyAgent = proxyUrl ? new HttpsProxyAgent(proxyUrl) : null;
 
 export class PrimApiError extends Error {
   constructor(message, status) {
@@ -33,6 +38,7 @@ export async function primGet(endpoint, params, apiKey) {
   const response = await fetch(url.toString(), {
     headers: { apiKey },
     signal:  AbortSignal.timeout(8000), // timeout 8s
+    agent:   proxyAgent,
   });
 
   if (!response.ok) {

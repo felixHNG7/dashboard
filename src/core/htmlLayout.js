@@ -27,7 +27,6 @@ export function renderLayout(modulesHtml) {
 
   <header class="header">
     <div class="header-left">
-      <div class="header-title">${title}</div>
       <div class="schedule-badge" id="schedule-badge"><span class="dot"></span>—</div>
       <div class="quota-bar-wrap">
         <div class="quota-label"><span id="quota-label">Quota —</span></div>

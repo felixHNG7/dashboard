@@ -41,7 +41,6 @@ export const velibModule = {
           </div>
           <div class="line-info">
             <h2>Vélib'</h2>
-            <small>${data.name}</small>
           </div>
           ${statusPill}
         </div>

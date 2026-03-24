@@ -4,13 +4,19 @@
  */
 
 import fetch from 'node-fetch';
+import { HttpsProxyAgent } from 'https-proxy-agent';
 
 const PRIM_BASE = 'https://prim.iledefrance-mobilites.fr/marketplace/velib';
+
+// Réutiliser l'agent proxy si configuré
+const proxyUrl = process.env.HTTPS_PROXY || process.env.HTTP_PROXY;
+const proxyAgent = proxyUrl ? new HttpsProxyAgent(proxyUrl) : null;
 
 async function primFetch(endpoint, apiKey) {
   const res = await fetch(`${PRIM_BASE}/${endpoint}`, {
     headers: { apiKey },
     signal:  AbortSignal.timeout(8000),
+    agent:   proxyAgent,
   });
   if (!res.ok) throw new Error(`Vélib PRIM ${endpoint} HTTP ${res.status}`);
   return res.json();

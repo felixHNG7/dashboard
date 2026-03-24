@@ -20,11 +20,18 @@ export const DASHBOARD_CONFIG = {
       id:      'velib-47001',
       type:    'velib',
       enabled: true,
-      layout:  'col-left row-bottom', // bloc bas droite
+      layout:  'velib-next', // à droite du RER D en portrait
       params:  {
         stationId:    '47001',  // vélos mécaniques
         docksStationId: '40008', // places libres (station distincte)
       },
+    },
+    {
+      id:      'tempo-tariff',
+      type:    'tempo',
+      enabled: true,
+      layout:  'tempo-below', // sous Vélib en portrait
+      params:  {},
     },
 
     // ── Colonne droite ─────────────────────────────────────────────
@@ -42,7 +49,7 @@ export const DASHBOARD_CONFIG = {
       layout:  'col-right row-top-right', // petit carré haut droite droite
       params:  { lineKey: 'METRO9' },
     },
-    
+
     {
       id:      'weather-paris',
       type:    'weather',
