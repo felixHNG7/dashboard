@@ -32,10 +32,10 @@ export const SCHEDULE = {
   peak: {
     startHour:  7,
     endHour:    10,
-    intervalS:  30,   
+    intervalS:  15,   
   },
   offPeak: {
-    intervalS:  60,     
+    intervalS:  30,     
   },
 
   // ── Plage nuit : pas de rafraîchissement ──────────────────────
@@ -47,15 +47,54 @@ export const SCHEDULE = {
   },
 };
 
+const PARIS_TZ = 'Europe/Paris';
+
 /**
- * Retourne l'intervalle de rafraîchissement en secondes selon l'heure actuelle.
+ * Heure locale Paris (alignée sur l’usage IDF du dashboard).
+ */
+export function getParisClock(date = new Date()) {
+  const fmt = new Intl.DateTimeFormat('en-GB', {
+    timeZone:     PARIS_TZ,
+    hour:         'numeric',
+    minute:       'numeric',
+    second:       'numeric',
+    hour12:       false,
+  });
+  const parts = fmt.formatToParts(date);
+  const n = type => parseInt(parts.find(p => p.type === type)?.value ?? '0', 10);
+  return { hour: n('hour'), minute: n('minute'), second: n('second') };
+}
+
+/**
+ * Millisecondes jusqu’au prochain instant où la plage (nuit / pointe / hors pointe) peut changer.
+ * Utilisé pour replanifier le refresh avant le prochain changement de créneau.
+ */
+export function getMsUntilNextScheduleBoundaryMs(date = new Date()) {
+  const { hour, minute, second } = getParisClock(date);
+  const secFromMidnight = hour * 3600 + minute * 60 + second;
+  const { peak, night } = SCHEDULE;
+  const boundarySecs = [
+    night.endHour * 3600,
+    peak.startHour * 3600,
+    peak.endHour * 3600,
+    night.startHour * 3600,
+  ].sort((a, b) => a - b);
+
+  for (const b of boundarySecs) {
+    if (b > secFromMidnight) return (b - secFromMidnight) * 1000;
+  }
+  return (86400 - secFromMidnight + boundarySecs[0]) * 1000;
+}
+
+/**
+ * Retourne l'intervalle de rafraîchissement en secondes selon l'heure actuelle (Paris).
  * @returns {number|null} Intervalle en secondes, ou null si nuit (suspend)
  */
 export function getCurrentInterval() {
-  const hour = new Date().getHours();
+  const { hour } = getParisClock();
   const { peak, offPeak, night } = SCHEDULE;
 
-  if (hour >= night.startHour && hour < night.endHour) {
+  if (hour >= night.startHour || hour < night.endHour) {
     return night.intervalS; // null → suspend
   }
   if (hour >= peak.startHour && hour < peak.endHour) {
@@ -65,12 +104,12 @@ export function getCurrentInterval() {
 }
 
 /**
- * Retourne la plage active : 'peak' | 'offPeak' | 'night'
+ * Retourne la plage active : 'peak' | 'offPeak' | 'night' (heure Paris).
  */
 export function getCurrentSlot() {
-  const hour = new Date().getHours();
+  const { hour } = getParisClock();
   const { peak, night } = SCHEDULE;
-  if (hour >= night.startHour && hour < night.endHour) return 'night';
-  if (hour >= peak.startHour  && hour < peak.endHour)  return 'peak';
+  if (hour >= night.startHour || hour < night.endHour) return 'night';
+  if (hour >= peak.startHour && hour < peak.endHour) return 'peak';
   return 'offPeak';
 }

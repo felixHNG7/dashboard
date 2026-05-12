@@ -16,15 +16,10 @@ import { Router } from 'express';
 import { primGet } from '../api/primClient.js';
 import { LINES, STOPS } from '../../config/lines.js';
 import fetch from 'node-fetch';
-import { HttpsProxyAgent } from 'https-proxy-agent';
 
 const router = Router();
 const PRIM_BASE = 'https://prim.iledefrance-mobilites.fr/marketplace';
 const OPEN_METEO_URL = 'https://api.open-meteo.com/v1/forecast';
-
-// Agent proxy si configuré
-const proxyUrl = process.env.HTTPS_PROXY || process.env.HTTP_PROXY;
-const proxyAgent = proxyUrl ? new HttpsProxyAgent(proxyUrl) : null;
 
 async function fetchDeparturesRaw(apiKey) {
   const stop = STOPS.MAISONS_ALFORT_ALFORTVILLE;
@@ -41,10 +36,19 @@ async function fetchLineStatusRaw(lineKey, apiKey) {
 }
 
 async function fetchVelibRaw(apiKey) {
-  const [status, info] = await Promise.all([
-    fetch(`${PRIM_BASE}/velib/station_status.json`, { headers: { apiKey }, signal: AbortSignal.timeout(8000), agent: proxyAgent }).then(r => r.json()),
-    fetch(`${PRIM_BASE}/velib/station_information.json`, { headers: { apiKey }, signal: AbortSignal.timeout(8000), agent: proxyAgent }).then(r => r.json()),
-  ]);
+  const statusRes = await fetch(`${PRIM_BASE}/velib/station_status.json`, {
+    headers: { apiKey },
+    signal:  AbortSignal.timeout(8000),
+  });
+  if (!statusRes.ok) throw new Error(`Vélib station_status HTTP ${statusRes.status}`);
+  const status = await statusRes.json();
+  await new Promise(r => setTimeout(r, 120));
+  const infoRes = await fetch(`${PRIM_BASE}/velib/station_information.json`, {
+    headers: { apiKey },
+    signal:  AbortSignal.timeout(8000),
+  });
+  if (!infoRes.ok) throw new Error(`Vélib station_information HTTP ${infoRes.status}`);
+  const info = await infoRes.json();
   return { station_status: status, station_information: info };
 }
 
@@ -56,7 +60,7 @@ async function fetchWeatherRaw() {
   url.searchParams.set('current', 'temperature_2m,apparent_temperature,wind_speed_10m,wind_direction_10m,relative_humidity_2m,weather_code,precipitation');
   url.searchParams.set('hourly', 'temperature_2m,precipitation,weather_code');
   url.searchParams.set('forecast_days', '2');
-  const res = await fetch(url.toString(), { signal: AbortSignal.timeout(8000), agent: proxyAgent });
+  const res = await fetch(url.toString(), { signal: AbortSignal.timeout(8000) });
   if (!res.ok) throw new Error(`Open-Meteo HTTP ${res.status}`);
   return res.json();
 }

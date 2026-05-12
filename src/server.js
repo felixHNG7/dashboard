@@ -10,7 +10,12 @@ import { dirname, join } from 'path';
 import { renderAllModules }                           from './core/dashboardRenderer.js';
 import { renderLayout }                               from './core/htmlLayout.js';
 import { getQuotaStats }                              from './core/quotaTracker.js';
-import { getCurrentInterval, getCurrentSlot, SCHEDULE } from '../config/schedule.js';
+import {
+  getCurrentInterval,
+  getCurrentSlot,
+  getMsUntilNextScheduleBoundaryMs,
+  SCHEDULE,
+} from '../config/schedule.js';
 import rawApiRoutes                                   from './routes/rawApiRoutes.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -47,8 +52,9 @@ app.get('/api/status', (req, res) => {
   res.json({
     quota:    getQuotaStats(),
     schedule: {
-      currentSlot:     getCurrentSlot(),
-      currentInterval: getCurrentInterval(),
+      currentSlot:                   getCurrentSlot(),
+      currentInterval:               getCurrentInterval(),
+      msUntilNextScheduleBoundary:   getMsUntilNextScheduleBoundaryMs(),
       peak:    SCHEDULE.peak,
       offPeak: SCHEDULE.offPeak,
       night:   SCHEDULE.night,

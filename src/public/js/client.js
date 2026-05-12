@@ -137,21 +137,26 @@ async function schedule() {
   const interval = sched?.currentInterval ?? null;
   const slot     = sched?.currentSlot     ?? 'offPeak';
 
+  const boundaryMs = Math.max(0, sched?.msUntilNextScheduleBoundary ?? 86_400_000);
+
   if (slot === 'night' || interval === null) {
-    // Mode nuit : overlay + vérification toutes les minutes
-    showNightOverlay(sched?.peak?.startHour ?? 7);
+    // Mode nuit : overlay + reprise dès le prochain créneau (ou max 1 min)
+    showNightOverlay(sched?.night?.endHour ?? 6);
     stopCountdown();
-    refreshTimer = setTimeout(schedule, 60_000);
+    const delay = Math.max(1_000, Math.min(60_000, boundaryMs || 60_000));
+    refreshTimer = setTimeout(schedule, delay);
     return;
   }
 
   hideNightOverlay();
 
-  // Refresh immédiat + replanification
+  // Refresh immédiat + replanification : ne pas dépasser le prochain changement de plage (Paris)
   await refreshDashboard();
   startCountdown(interval);
 
-  refreshTimer = setTimeout(schedule, interval * 1000);
+  const intervalMs = interval * 1000;
+  const delayMs    = Math.max(1_000, Math.min(intervalMs, boundaryMs || intervalMs));
+  refreshTimer = setTimeout(schedule, delayMs);
 }
 
 // ── Démarrage ─────────────────────────────────────────────────────

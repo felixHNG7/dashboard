@@ -5,20 +5,13 @@
  * ─────────────────────────────────────────────────────────────────
  */
 
-import { getVelibStation } from '../api/velibService.js';
+import { getVelibModuleData } from '../api/velibService.js';
 
 export const velibModule = {
   async fetch(context, apiKey) {
     const { stationId, docksStationId } = context;
     if (!stationId) throw new Error('stationId manquant dans la config du module Vélib');
-    const [main, docks] = await Promise.all([
-      getVelibStation(stationId, apiKey),
-      docksStationId ? getVelibStation(docksStationId, apiKey) : null,
-    ]);
-    if (docks) {
-      return { ...main, docksAvailable: docks.docksAvailable, docksCapacity: docks.capacity, docksStationName: docks.name };
-    }
-    return main;
+    return getVelibModuleData({ stationId, docksStationId }, apiKey);
   },
 
   render(data) {
@@ -41,6 +34,7 @@ export const velibModule = {
           </div>
           <div class="line-info">
             <h2>Vélib'</h2>
+            <small>${data.name}</small>
           </div>
           ${statusPill}
         </div>
