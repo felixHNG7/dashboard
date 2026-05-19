@@ -2,9 +2,7 @@ version: '3.8'
 
 services:
   dashboard:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: fhngu/dashboard:1.0.1
     container_name: transport-dashboard
     restart: unless-stopped
     ports:
