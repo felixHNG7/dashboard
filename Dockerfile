@@ -32,6 +32,10 @@ RUN addgroup -g 1001 -S nodejs && \
 # Switch to non-root user
 USER nodejs
 
+# Fuseau horaire par défaut du conteneur (évite les décalages sur les
+# formatages de date côté serveur qui n'imposent pas explicitement Europe/Paris)
+ENV TZ=Europe/Paris
+
 # Expose port
 EXPOSE 3000
 

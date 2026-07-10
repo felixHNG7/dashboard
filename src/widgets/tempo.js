@@ -27,29 +27,22 @@ export const tempoModule = {
     return `
       <div class="card card--tempo">
         <div class="card-header">
-          <div class="line-badge" style="background:#1a5c9a;color:#fff;font-size:1.4rem;width:42px;height:42px;">
-            ⚡
-          </div>
+          <div class="line-badge tempo-badge">⚡</div>
           <div class="line-info">
             <h2>Électricité</h2>
             <small>EDF Tempo</small>
           </div>
         </div>
         <div class="tempo-body">
-          <div class="tempo-row">
-            <div class="tempo-today" style="background:${todayColor.bg};color:${todayColor.text}">
-              <div class="tempo-label">Aujourd'hui</div>
-              <div class="tempo-color">${todayColor.label}</div>
-              <div class="tempo-price">${currentPrice} € /kWh</div>
-            </div>
+          <div class="tempo-col tempo-col--today" style="background:${todayColor.bg};color:${todayColor.text}">
+            <div class="tempo-label">Aujourd'hui</div>
+            <div class="tempo-color">${todayColor.label}</div>
+            <div class="tempo-price">${currentPrice} € /kWh</div>
           </div>
-          <div class="tempo-divider"></div>
-          <div class="tempo-row">
-            <div class="tempo-tomorrow" style="background:${tomorrowColor.bg};color:${tomorrowColor.text}">
-              <div class="tempo-label">Demain</div>
-              <div class="tempo-color">${tomorrowColor.label}</div>
-              <div class="tempo-date">${tomorrow.date}</div>
-            </div>
+          <div class="tempo-col tempo-col--tomorrow" style="background:${tomorrowColor.bg};color:${tomorrowColor.text}">
+            <div class="tempo-label">Demain</div>
+            <div class="tempo-color">${tomorrowColor.label}</div>
+            <div class="tempo-date">${tomorrow.date}</div>
           </div>
         </div>
       </div>`;

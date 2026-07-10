@@ -4,7 +4,7 @@
 
 import { getLineStatus } from '../api/lineStatusService.js';
 
-const STATUS_META = {
+export const STATUS_META = {
   ok:        { label: 'Normal',    pillClass: 'pill-ok',   icon: '✓' },
   warning:   { label: 'Info',      pillClass: 'pill-warn', icon: '⚠' },
   disrupted: { label: 'Perturbé',  pillClass: 'pill-err',  icon: '✕' },

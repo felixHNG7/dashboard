@@ -30,13 +30,15 @@ npm start                # Production
 - `config/schedule.js` → Plages horaires (peak/offPeak/night) + intervalles de refresh
 
 **APIs utilisées :**
-- **PRIM IDFM** (clé API requise) : stop-monitoring (départs), general-message (état ligne), vélib
+- **PRIM IDFM** (clé API requise) : stop-monitoring (départs), general-message (état ligne), vélib (station_status + station_information)
 - **Open-Meteo** (gratuit) : météo
+- **api-couleur-tempo.fr** (gratuit, sans clé) : couleur tarifaire EDF Tempo (widget `tempo`)
 
 **Gestion du quota :**
-- Quota gratuit PRIM : ~20 000 appels/jour
+- Quota gratuit PRIM : ~20 000 appels/jour (`DAILY_LIMIT` dans `quotaTracker.js`)
 - `quotaTracker.js` : suit les appels, persiste dans `.quota-state.json`
-- `schedule.js` : adapte la fréquence (30s pointe, 60s hors pointe, suspend la nuit)
+- `schedule.js` : adapte la fréquence (15s en pointe 7h-10h, 30s hors pointe, suspend la nuit 23h-6h) — voir le détail du calcul de budget en tête de fichier
+- Seuls les appels PRIM comptent dans le quota ; Open-Meteo et EDF Tempo n'en consomment pas
 
 ## Ajouter un widget
 
@@ -46,12 +48,19 @@ npm start                # Production
 
 ## API de debug
 
-- `/api/raw` → Toutes les réponses API brutes
+- `/api/raw` → Toutes les réponses API brutes (PRIM + Open-Meteo, agrégées)
 - `/api/raw/departures` → stop-monitoring
 - `/api/raw/line-status/:lineKey` → general-message
 - `/api/raw/velib` → Vélib status
 - `/api/raw/weather` → Open-Meteo
+- `/api/status` → état quota + plage horaire courante (utilisé par le client pour l'overlay nuit et la barre de quota)
 
 ## Layout
 
-Grille CSS en mode vertical (tablette). Layouts définis via `layout: 'col-left row-top'` etc. dans `config/dashboard.js`. Le CSS est dans `src/public/css/dashboard.css`.
+Grille CSS fixe en mode portrait (tablette) : 3 colonnes × 5 lignes. Chaque module cible une zone précise via `layout: 'col-left row-top'` etc. dans `config/dashboard.js` ; ces valeurs sont converties en classes `layout-xxx` par `dashboardRenderer.js` et doivent avoir une règle correspondante dans `src/public/css/dashboard.css` (sinon le module tombe dans `.layout-default`, pleine largeur). Zones existantes : `col-left row-top`, `col-right row-top-left`, `col-right row-top-right`, `col-left row-bottom`, `col-right row-bottom`, `row-extra` (pleine largeur, ligne 5 — utilisée par le widget `tempo`).
+
+## Déploiement
+
+- `Dockerfile` : build multi-stage Node 20 alpine, utilisateur non-root, healthcheck sur `/api/status`
+- `docker-compose.yml` : lance l'image avec un volume persistant pour `.quota-state.json`
+- `kube/` : manifests Kubernetes (namespace, deployment, service, ingress, secret, kustomization)

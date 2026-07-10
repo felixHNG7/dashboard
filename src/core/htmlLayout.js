@@ -21,6 +21,7 @@ export function renderLayout(modulesHtml) {
     <div class="moon">🌙</div>
     <div class="wake-at">Rafraîchissement suspendu</div>
     <div class="next-wake">Réveil à ${String(peak.startHour).padStart(2,'0')}:00</div>
+    <button type="button" class="wake-btn" id="wake-btn">Réveiller (5 min)</button>
   </div>
 
   <div class="quota-warning" id="quota-warning"></div>

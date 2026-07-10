@@ -3,27 +3,22 @@
  * ─────────────────────────────────────────────────────────────────
  * Gestion des plages horaires et de la politique de rafraîchissement.
  *
- * QUOTA PRIM (clé gratuite créée après mars 2024) : 1 000 appels/jour
- * Le dashboard fait désormais 5 appels PRIM par refresh :
+ * QUOTA PRIM (clé gratuite) : ~20 000 appels/jour (voir quotaTracker.js : DAILY_LIMIT)
+ * Le dashboard fait 5 appels PRIM par refresh :
  *   - stop-monitoring          (RER D horaires)
  *   - general-message × 2     (état RER D + Métro 9)
  *   - velib/station_status     (Vélib)
  *   - velib/station_information (Vélib)
- * La météo (Open-Meteo) est gratuite et sans quota PRIM.
+ * La météo (Open-Meteo) et EDF Tempo (api-couleur-tempo.fr) sont gratuites
+ * et hors quota PRIM.
  *
- * Budget recommandé :
- *   - Heure de pointe (7h–10h, 3h) : toutes les 90s
- *       → 3h × 40 cycles/h × 5 appels = 600 appels
- *   - Hors pointe                   : toutes les 10min
- *       → 21h × 6 cycles/h × 5 appels = 630 appels
- *   - TOTAL ESTIMÉ : ~1230 appels/jour → dépasse le quota !
- *
- * ⚠ Ajustement nécessaire avec 5 appels/refresh :
- *   - Heure de pointe : toutes les 120s
- *       → 3h × 30 cycles/h × 5 appels = 450 appels
- *   - Hors pointe     : toutes les 15min
- *       → 21h × 4 cycles/h × 5 appels = 420 appels
- *   - TOTAL ESTIMÉ : ~870 appels/jour  (marge ~13%)
+ * Budget avec les intervalles actuels (peak=15s, offPeak=30s, nuit suspendue) :
+ *   - Heure de pointe (7h–10h, 3h) : toutes les 15s
+ *       → 3h × 240 cycles/h × 5 appels = 3600 appels
+ *   - Hors pointe (10h–1h, 15h)    : toutes les 30s
+ *       → 15h × 120 cycles/h × 5 appels = 9000 appels
+ *   - Nuit (1h–6h) : suspendu, 0 appel (réveil manuel possible depuis le client, voir client.js)
+ *   - TOTAL ESTIMÉ : ~12 600 appels/jour (marge ~37% sur 20 000)
  * ─────────────────────────────────────────────────────────────────
  */
 
@@ -32,17 +27,17 @@ export const SCHEDULE = {
   peak: {
     startHour:  7,
     endHour:    10,
-    intervalS:  15,   
+    intervalS:  15,
   },
   offPeak: {
-    intervalS:  30,     
+    intervalS:  30,
   },
 
-  // ── Plage nuit : pas de rafraîchissement ──────────────────────
-  // (optionnel – économise le quota la nuit)
+  // ── Plage nuit : pas de rafraîchissement automatique ───────────
+  // (le client peut forcer un réveil temporaire, voir showNightOverlay/wake dans client.js)
   night: {
-    startHour:  23,       // de 23h…
-    endHour:    6,       // …à 6h : rafraîchissement suspendu
+    startHour:  1,        // de 1h du matin…
+    endHour:    6,        // …à 6h : rafraîchissement suspendu
     intervalS:  null,    // null = pas de refresh automatique
   },
 };
@@ -87,6 +82,18 @@ export function getMsUntilNextScheduleBoundaryMs(date = new Date()) {
 }
 
 /**
+ * Teste si `hour` tombe dans la plage nuit, que celle-ci traverse minuit
+ * (ex. 23h→6h) ou non (ex. 1h→6h).
+ */
+function isNightHour(hour, night) {
+  const { startHour, endHour } = night;
+  if (startHour === endHour) return false;
+  return startHour > endHour
+    ? (hour >= startHour || hour < endHour)  // plage qui traverse minuit
+    : (hour >= startHour && hour < endHour); // plage classique dans la même journée
+}
+
+/**
  * Retourne l'intervalle de rafraîchissement en secondes selon l'heure actuelle (Paris).
  * @returns {number|null} Intervalle en secondes, ou null si nuit (suspend)
  */
@@ -94,7 +101,7 @@ export function getCurrentInterval() {
   const { hour } = getParisClock();
   const { peak, offPeak, night } = SCHEDULE;
 
-  if (hour >= night.startHour || hour < night.endHour) {
+  if (isNightHour(hour, night)) {
     return night.intervalS; // null → suspend
   }
   if (hour >= peak.startHour && hour < peak.endHour) {
@@ -109,7 +116,7 @@ export function getCurrentInterval() {
 export function getCurrentSlot() {
   const { hour } = getParisClock();
   const { peak, night } = SCHEDULE;
-  if (hour >= night.startHour || hour < night.endHour) return 'night';
+  if (isNightHour(hour, night)) return 'night';
   if (hour >= peak.startHour && hour < peak.endHour) return 'peak';
   return 'offPeak';
 }

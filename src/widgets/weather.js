@@ -28,13 +28,6 @@ export const weatherModule = {
 
     return `
       <div class="card card--weather">
-        <div class="card-header">
-          <div class="weather-emoji-big">${data.emoji}</div>
-          <div class="line-info">
-            <h2>Météo Paris</h2>
-            <small>${data.label}</small>
-          </div>
-        </div>
         <div class="weather-body">
           <div class="weather-main">
             <div class="weather-temp">${data.temp}<span class="weather-unit">°C</span></div>

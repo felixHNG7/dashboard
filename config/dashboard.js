@@ -17,23 +17,23 @@ export const DASHBOARD_CONFIG = {
       },
     },
     {
-      id:      'velib-47001',
-      type:    'velib',
+      id:      'weather-paris',
+      type:    'weather',
       enabled: true,
-      layout:  'col-left row-bottom', // bloc bas droite
-      params:  {
-        stationId:    '47001',  // vélos mécaniques
-        docksStationId: '40008', // places libres (station distincte)
+      layout:  'col-left row-bottom', // bloc bas gauche
+      params: {
+        lat: 48.8566,
+        lon: 2.3522,
       },
     },
 
     // ── Colonne droite ─────────────────────────────────────────────
     {
-      id:      'status-rerd',
-      type:    'line-status',
+      id:      'tempo-edf',
+      type:    'tempo',
       enabled: true,
       layout:  'col-right row-top-left', // petit carré haut droite gauche
-      params:  { lineKey: 'RERD' },
+      params:  {},
     },
     {
       id:      'status-metro9',
@@ -42,15 +42,15 @@ export const DASHBOARD_CONFIG = {
       layout:  'col-right row-top-right', // petit carré haut droite droite
       params:  { lineKey: 'METRO9' },
     },
-    
+
     {
-      id:      'weather-paris',
-      type:    'weather',
+      id:      'velib-47001',
+      type:    'velib',
       enabled: true,
-      layout:  'col-right row-bottom', // grand bloc bas gauche
-      params: {
-        lat: 48.8566,
-        lon: 2.3522,
+      layout:  'col-right row-bottom', // bloc bas droite
+      params:  {
+        stationId:    '47001',  // vélos mécaniques
+        docksStationId: '40008', // places libres (station distincte)
       },
     },
   ],

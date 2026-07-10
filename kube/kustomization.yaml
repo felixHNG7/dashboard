@@ -1,0 +1,8 @@
+resources:
+  - deployment.yaml
+  - ingress.yaml
+  - namespace.yaml
+  - secret.yaml
+  - service.yaml
+
+namespace: dashboard

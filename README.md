@@ -22,30 +22,44 @@ Ouvrez [http://localhost:3000](http://localhost:3000).
 transport-dashboard/
 ├── config/
 │   ├── lines.js          # Référentiel des lignes et arrêts (IDs STIF)
-│   └── dashboard.js      # Configuration du layout et des modules
+│   ├── dashboard.js      # Configuration du layout et des modules
+│   └── schedule.js       # Plages horaires (peak/offPeak/night) + intervalles de refresh
 │
 ├── src/
 │   ├── server.js          # Point d'entrée Express
 │   │
-│   ├── api/               # Couche données (appels PRIM)
-│   │   ├── primClient.js         # Client HTTP bas niveau
+│   ├── api/               # Couche données (appels externes)
+│   │   ├── primClient.js         # Client HTTP bas niveau PRIM
 │   │   ├── lineStatusService.js  # Service : état d'une ligne
-│   │   └── departuresService.js  # Service : prochains passages
+│   │   ├── departuresService.js  # Service : prochains passages
+│   │   ├── velibService.js       # Service : disponibilité Vélib
+│   │   ├── weatherService.js     # Service : météo Open-Meteo
+│   │   └── tempoService.js       # Service : couleur tarifaire EDF Tempo
 │   │
 │   ├── core/              # Orchestration
 │   │   ├── moduleRegistry.js     # Registre des types de widgets
 │   │   ├── dashboardRenderer.js  # Rendu parallèle de tous les modules
-│   │   └── htmlLayout.js         # Template HTML principal
+│   │   ├── htmlLayout.js         # Template HTML principal
+│   │   └── quotaTracker.js       # Suivi des appels PRIM, persistance .quota-state.json
 │   │
 │   ├── widgets/           # Un fichier = un type de widget
 │   │   ├── lineStatus.js         # Widget état de ligne
-│   │   └── nextDepartures.js     # Widget prochains passages
+│   │   ├── nextDepartures.js     # Widget prochains passages
+│   │   ├── velib.js              # Widget disponibilité Vélib
+│   │   ├── weather.js            # Widget météo
+│   │   └── tempo.js              # Widget couleur tarifaire EDF Tempo
+│   │
+│   ├── routes/
+│   │   └── rawApiRoutes.js       # Endpoints de debug /api/raw/*
 │   │
 │   └── public/            # Assets statiques servis par Express
 │       ├── css/dashboard.css
-│       └── js/client.js          # Horloge + auto-refresh AJAX
+│       └── js/client.js          # Horloge + auto-refresh AJAX + barre de quota
 │
-└── .env                   # IDFM_API_KEY=... (non versionné)
+├── Dockerfile              # Build production Node 20 alpine
+├── docker-compose.yml      # Déploiement conteneur local
+├── kube/                   # Manifests Kubernetes (deployment, service, ingress, ...)
+└── .env                    # IDFM_API_KEY=... (non versionné)
 ```
 
 ---
@@ -98,8 +112,21 @@ export const REGISTRY = {
 
 ---
 
+## Déploiement
+
+```bash
+docker compose up -d --build   # via docker-compose.yml
+```
+
+Les manifests Kubernetes (`kube/`) déploient la même image : `namespace.yaml`, `deployment.yaml`, `service.yaml`, `ingress.yaml`, `secret.yaml` (contient `IDFM_API_KEY`), assemblés par `kustomization.yaml`.
+
+```bash
+kubectl apply -k kube/
+```
+
 ## Références API
 
 - [Documentation PRIM](https://prim.iledefrance-mobilites.fr/fr/apis)
 - [Référentiel des lignes](https://data.iledefrance-mobilites.fr/explore/dataset/referentiel-des-lignes)
 - [Référentiel des arrêts](https://data.iledefrance-mobilites.fr/explore/dataset/arrets-lignes)
+- [api-couleur-tempo.fr](https://www.api-couleur-tempo.fr) — couleur tarifaire EDF Tempo (widget `tempo`)

@@ -28,6 +28,13 @@ let countdownTimer   = null;
 let nextRefreshAt    = null;
 let currentSlot      = null;
 
+// Réveil manuel (mode nuit) : timestamp ms jusqu'auquel forcer le rafraîchissement
+let manualWakeUntil  = 0;
+
+function isManualWakeActive() {
+  return manualWakeUntil > Date.now();
+}
+
 // ── Récupère le statut (quota + planning) depuis le serveur ──────
 async function fetchStatus() {
   try {
@@ -91,6 +98,17 @@ function hideNightOverlay() {
   if (el) el.classList.remove('visible');
 }
 
+// ── Bouton de réveil manuel ────────────────────────────────────────
+const wakeBtn = document.getElementById('wake-btn');
+if (wakeBtn) {
+  wakeBtn.addEventListener('click', () => {
+    manualWakeUntil = Date.now() + 5 * 60 * 1000; // 5 min
+    hideNightOverlay();
+    if (refreshTimer) clearTimeout(refreshTimer);
+    schedule();
+  });
+}
+
 // ── Countdown jusqu'au prochain refresh ──────────────────────────
 function startCountdown(intervalS) {
   if (countdownTimer) clearInterval(countdownTimer);
@@ -140,6 +158,19 @@ async function schedule() {
   const boundaryMs = Math.max(0, sched?.msUntilNextScheduleBoundary ?? 86_400_000);
 
   if (slot === 'night' || interval === null) {
+    if (isManualWakeActive()) {
+      // Réveil manuel actif : on force un cycle de rafraîchissement en cadence
+      // hors-pointe jusqu'à expiration de la fenêtre de 5 min (ou fin réelle de la nuit).
+      hideNightOverlay();
+      const wakeInterval = sched?.offPeak?.intervalS ?? 60;
+      await refreshDashboard();
+      startCountdown(wakeInterval);
+      const remainingWakeMs = manualWakeUntil - Date.now();
+      const delayMs = Math.max(1_000, Math.min(wakeInterval * 1000, remainingWakeMs));
+      refreshTimer = setTimeout(schedule, delayMs);
+      return;
+    }
+
     // Mode nuit : overlay + reprise dès le prochain créneau (ou max 1 min)
     showNightOverlay(sched?.night?.endHour ?? 6);
     stopCountdown();

@@ -28,8 +28,8 @@ export const velibModule = {
 
     return `
       <div class="card card--velib">
-        <div class="card-header">
-          <div class="line-badge" style="background:#009a44;color:#fff;font-size:2rem;width:50px;height:50px;">
+        <div class="card-header card-header--velib">
+          <div class="line-badge line-badge--velib" style="background:#009a44;color:#fff;">
             🚲
           </div>
           <div class="line-info">

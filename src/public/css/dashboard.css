@@ -140,7 +140,7 @@ body {
   flex-direction: column;
   height: 100%;
   overflow: hidden;
-  margin-bottom: 20px;
+  margin-bottom: 10px;
 }
 .card--error { border-color: #3a1010; }
 
@@ -190,9 +190,22 @@ body {
 .time-imminent .time-main, .time-imminent .time-wait { color: var(--red) !important; }
 .time-soon     .time-main, .time-soon     .time-wait { color: var(--yellow) !important; }
 
+/* Départ le plus proche : emphase visuelle forte, lisible de loin */
+.passage-item--next {
+  padding: 1rem .6rem;
+  margin: 0 -.1rem .1rem;
+  background: linear-gradient(90deg, rgba(59,130,246,0.08), transparent 70%);
+  border-left: 3px solid var(--blue);
+  border-bottom: 1px solid var(--border);
+  border-radius: 8px;
+}
+.passage-item--next .passage-dest { font-size: 1.1rem; }
+.passage-item--next .time-main    { font-size: 2.4rem; font-weight: 700; letter-spacing: .01em; }
+.passage-item--next .time-wait    { font-size: 1rem; font-weight: 500; margin-top: .25rem; }
+.passage-item--next.time-imminent,
+.passage-item--next .time-imminent { border-left-color: var(--red); }
+
 /* ── Météo ── */
-.card--weather .card-header { border-bottom: 1px solid var(--border); }
-.weather-emoji-big { font-size: 2rem; flex-shrink: 0; }
 
 .weather-body { flex: 1; display: flex; flex-direction: column; gap: .6rem; padding: var(--pad); overflow: hidden; }
 
@@ -223,6 +236,8 @@ body {
 
 /* ── Vélib ── */
 .card--velib { height: auto; }
+.card-header--velib { padding: .6rem var(--pad); min-height: 40px; gap: .7rem; }
+.line-badge--velib { width: 34px; height: 34px; font-size: 1.15rem; border-radius: 9px; }
 .velib-body { flex: 1; display: flex; flex-direction: column; justify-content: center; padding: var(--pad); gap: 0.75rem; flex-shrink: 0; }
 .velib-stat-row { display: flex; align-items: center; gap: 1rem; }
 .velib-stat { flex: 1; display: flex; flex-direction: column; gap: .4rem; }
@@ -264,6 +279,45 @@ body {
 .velib-bar-fill.level-low { color: var(--red); background: var(--red); }
 .velib-capacity { font-family: 'DM Mono', monospace; font-size: .68rem; color: var(--muted); text-align: center; }
 
+/* ── Tempo EDF ── */
+.tempo-badge { background: #1a5c9a; color: #fff; font-size: 1.4rem; width: 42px; height: 42px; }
+.tempo-body {
+  flex: 1;
+  display: flex;
+  gap: .6rem;
+  padding: var(--pad);
+  min-height: 0;
+}
+.tempo-col {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: .3rem;
+  border-radius: 10px;
+  padding: .7rem .5rem;
+  text-align: center;
+}
+.tempo-label {
+  font-size: .62rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  opacity: .85;
+}
+.tempo-color {
+  font-size: .95rem;
+  font-weight: 700;
+}
+.tempo-price,
+.tempo-date {
+  font-family: 'DM Mono', monospace;
+  font-size: .68rem;
+  opacity: .9;
+}
+
 /* ── Footer ── */
 .footer { flex-shrink: 0; display: flex; align-items: center; justify-content: space-between; font-size: .65rem; color: var(--muted); font-family: 'DM Mono', monospace; flex-wrap: wrap; gap: .4rem; }
 .footer a { color: var(--blue); text-decoration: none; }
@@ -276,6 +330,26 @@ body {
 .night-overlay .moon   { font-size: 3rem; margin-bottom: .5rem; }
 .night-overlay .wake-at { font-size: .9rem; }
 .night-overlay .next-wake { font-size: .72rem; color: #3a3a52; }
+.wake-btn {
+  margin-top: 1rem;
+  font-family: 'DM Mono', monospace;
+  font-size: .78rem;
+  font-weight: 500;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 100px;
+  padding: .7rem 1.4rem;
+  min-height: var(--touch);
+  cursor: pointer;
+  transition: background .2s, border-color .2s, color .2s;
+}
+.wake-btn:hover,
+.wake-btn:focus-visible { border-color: var(--blue); color: var(--blue); }
+.wake-btn:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+.wake-btn:active { background: #171725; }
 
 /* ── Error / states ── */
 .error-icon { font-size: 1.1rem; color: var(--red); }
@@ -307,4 +381,16 @@ body {
   border: 1px solid #3a2510;
   border-radius: 8px;
   padding: .5rem .7rem;
+}
+
+/* Variante compacte : bloc secondaire sous une liste (ex. departures) */
+.status-messages-list--compact {
+  flex: 0 0 auto;
+  max-height: 140px;
+  border-top: 1px solid var(--border);
+  padding: .6rem var(--pad);
+}
+.status-messages-list--compact .status-msg-item {
+  font-size: .72rem;
+  padding: .4rem .6rem;
 }
