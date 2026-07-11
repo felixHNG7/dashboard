@@ -34,14 +34,22 @@ function buildFeelsLikeSparkline(hourly) {
 
   const dotsSvg = markerIdx.map(i => `<circle cx="${points[i].x.toFixed(1)}" cy="${points[i].y.toFixed(1)}" r="2.2" fill="var(--blue)" stroke="var(--surface)" stroke-width="1" />`).join('');
 
-  // Étiquettes horaires en HTML (positionnées en %), pas en <text> SVG : le
-  // viewBox est étiré non-uniformément (preserveAspectRatio="none"), ce qui
-  // déformerait des glyphes de texte.
+  // Étiquettes horaires + valeurs en HTML (positionnées en %), pas en <text>
+  // SVG : le viewBox est étiré non-uniformément (preserveAspectRatio="none"),
+  // ce qui déformerait des glyphes de texte.
   const labelsHtml = markerIdx.map(i => {
     const fraction = i / (values.length - 1);
     const align = fraction < 0.08 ? 'left' : fraction > 0.92 ? 'right' : 'center';
     const translateX = align === 'left' ? '0%' : align === 'right' ? '-100%' : '-50%';
     return `<span class="weather-trend-tick" style="left:${(fraction * 100).toFixed(1)}%; transform: translateX(${translateX});">${hourly[i].time}</span>`;
+  }).join('');
+
+  const valuesHtml = markerIdx.map(i => {
+    const xFraction = points[i].x / SPARK_W;
+    const yFraction = points[i].y / SPARK_H;
+    const align = xFraction < 0.08 ? 'left' : xFraction > 0.92 ? 'right' : 'center';
+    const translateX = align === 'left' ? '0%' : align === 'right' ? '-100%' : '-50%';
+    return `<span class="weather-trend-value" style="left:${(xFraction * 100).toFixed(1)}%; top:${(yFraction * 100).toFixed(1)}%; transform: translate(${translateX}, calc(-100% - 5px));">${values[i]}°</span>`;
   }).join('');
 
   return `
@@ -50,17 +58,20 @@ function buildFeelsLikeSparkline(hourly) {
         <span class="weather-trend-label">Ressenti 24h</span>
         <span class="weather-trend-minmax">${min}° / ${max}°</span>
       </div>
-      <svg class="weather-trend-svg" viewBox="0 0 ${SPARK_W} ${SPARK_H}" preserveAspectRatio="none">
-        <defs>
-          <linearGradient id="trendFill" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stop-color="var(--blue)" stop-opacity="0.35" />
-            <stop offset="100%" stop-color="var(--blue)" stop-opacity="0" />
-          </linearGradient>
-        </defs>
-        <path d="${areaPath}" fill="url(#trendFill)" stroke="none" />
-        <path d="${linePath}" fill="none" stroke="var(--blue)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" />
-        ${dotsSvg}
-      </svg>
+      <div class="weather-trend-chart">
+        <svg class="weather-trend-svg" viewBox="0 0 ${SPARK_W} ${SPARK_H}" preserveAspectRatio="none">
+          <defs>
+            <linearGradient id="trendFill" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="var(--blue)" stop-opacity="0.35" />
+              <stop offset="100%" stop-color="var(--blue)" stop-opacity="0" />
+            </linearGradient>
+          </defs>
+          <path d="${areaPath}" fill="url(#trendFill)" stroke="none" />
+          <path d="${linePath}" fill="none" stroke="var(--blue)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" />
+          ${dotsSvg}
+        </svg>
+        ${valuesHtml}
+      </div>
       <div class="weather-trend-ticks">${labelsHtml}</div>
     </div>`;
 }
