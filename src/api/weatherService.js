@@ -110,11 +110,11 @@ export async function getWeather(lat, lon) {
     return `${dayName} ${hourStr}`;
   };
 
-  // ── Prévisions toutes les 2h sur 6 points (à partir de l'heure actuelle) ──
+  // ── Prévisions toutes les heures sur 24h (à partir de l'heure actuelle) ──
   // Date prise en compte : "Demain 0h" quand minuit est le lendemain
   const forecasts = [];
-  for (let i = 0; i < 6; i++) {
-    const idx = baseIdx + i * 2;
+  for (let i = 0; i < 24; i++) {
+    const idx = baseIdx + i;
     if (!hourly.time[idx]) break;
     const timeStr   = hourly.time[idx];
     const timeLabel = formatTimeLabel(timeStr);

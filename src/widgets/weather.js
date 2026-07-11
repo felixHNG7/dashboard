@@ -1,7 +1,8 @@
 /**
  * src/widgets/weather.js
  * ─────────────────────────────────────────────────────────────────
- * Widget météo : température, ressenti, vent, pluie + prévisions 3h.
+ * Widget météo : température, ressenti, vent, pluie + prévisions horaires
+ * sur 24h (défilement latéral).
  * ─────────────────────────────────────────────────────────────────
  */
 
@@ -18,7 +19,7 @@ export const weatherModule = {
       ? `<div class="weather-rain-alert">🌧 ${data.precipNext3h} mm attendus dans les 3 prochaines heures</div>`
       : '';
 
-    const forecastHtml = data.hourly.slice(0, 6).map(h => `
+    const forecastHtml = data.hourly.map(h => `
       <div class="forecast-item">
         <span class="forecast-time">${h.time}</span>
         <span class="forecast-emoji">${h.emoji}</span>

@@ -1,8 +1,12 @@
 /* ──────────────────────────────────────────────────────────────
-   dashboard.css — Honor Pad X8a : 11" 1920×1200 landscape
-   Layout wireframe :
-     Col gauche (60%) : RER D horaires (haut) + Météo (bas)
-     Col droite (40%) : [État RER D | État M9] (haut) + Vélib (bas)
+   dashboard.css — tablette en mode PORTRAIT/vertical (défaut)
+   Layout wireframe (une seule colonne principale) :
+     Ligne 1 (pleine largeur, flex-grow)  : Prochain RER D
+     Ligne 2 (2 colonnes égales)          : Tempo EDF | État Métro 9
+     Ligne 3 (pleine largeur)             : Météo
+     Ligne 4 (pleine largeur)             : Vélib
+   Un fallback paysage (orientation: landscape) reprend l'ancienne
+   disposition 3 colonnes, mais le portrait est la cible par défaut.
    ────────────────────────────────────────────────────────────── */
 @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@300;400;500&family=Syne:wght@400;600;700;800&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Syne:wght@400;600;700;800&display=swap');
@@ -18,7 +22,7 @@
   --red:     #ef4444;
   --blue:    #3b82f6;
   --gap:     14px;
-  --pad:     1.25rem;
+  --pad:     1rem;
   --radius:  16px;
   --touch:   48px;
 }
@@ -70,17 +74,19 @@ body {
 .quota-warning { background: #251005; border: 1px solid #5a2a0a; border-radius: 8px; padding: .5rem 1rem; font-size: .78rem; color: #f0a060; display: none; flex-shrink: 0; }
 .quota-warning.visible { display: block; }
 
-/* GRID
-   row1: label transport | row2: modules transport | row3: label contexte | row4: modules contexte
-   Colonnes : 60% gauche | 20% | 20%
+/* GRID — portrait par défaut, une colonne principale
+   row1: RER D (pleine largeur, flex-grow) | row2: Tempo | Métro9 (2 col)
+   row3: Météo (pleine largeur) | row4: Vélib (pleine largeur)
+   Le "4fr" de la row1 (RER D) = 4x la part d'une row "1fr" : c'est le
+   réglage de hauteur du bloc RER D. Augmente/diminue ce chiffre pour
+   changer sa taille relative aux 3 autres lignes (300% = facteur 4).
 */
 .dashboard-grid {
   flex: 1;
   display: grid;
-  grid-template-columns: 35fr 32fr 33fr; /* horaires 35% | état RER D 32% | état Métro 65% */
-  grid-template-rows: auto 1fr auto 1fr;
-  column-gap: var(--gap);
-  row-gap: 0;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: minmax(0, 2fr) 1fr 1fr 1fr;
+  gap: var(--gap);
   min-height: 0;
 }
 
@@ -106,29 +112,56 @@ body {
 }
 .section-label:first-child { padding-top: 0; }
 
-/* Modules transport : row 2 */
-.layout-col-left-row-top        { grid-column: 1;          grid-row: 2; margin-bottom: 10px; }
-.layout-col-right-row-top-left  { grid-column: 2;          grid-row: 2; margin-bottom: 10px; }
-.layout-col-right-row-top-right { grid-column: 3;          grid-row: 2; margin-bottom: 10px; }
-/* Modules contexte : row 4 */
-.layout-col-left-row-bottom     { grid-column: 1; grid-row: 4; align-self: start; }
-.layout-col-right-row-bottom    { grid-column: 2 / span 2; grid-row: 4; }
-.layout-default { grid-column: span 3; }
+/* Ligne 1 : bloc principal RER D, occupe le plus de hauteur disponible */
+.layout-row-main        { grid-column: 1 / -1; grid-row: 1; min-height: 0; }
+/* Ligne 2 : Tempo EDF | Métro 9, moitié chacun */
+.layout-row-split-left  { grid-column: 1; grid-row: 2; }
+.layout-row-split-right { grid-column: 2; grid-row: 2; }
+/* Header réduit pour ces 2 cartes (moins de place en largeur qu'un header pleine largeur) */
+.layout-row-split-left .card-header,
+.layout-row-split-right .card-header {
+  padding: .5rem .75rem;
+  gap: .5rem;
+  min-height: 34px;
+}
+.layout-row-split-left .line-badge,
+.layout-row-split-right .line-badge {
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  font-size: 1rem;
+}
+.layout-row-split-left .line-info h2,
+.layout-row-split-right .line-info h2 {
+  font-size: .8rem;
+}
+.layout-row-split-left .line-info small,
+.layout-row-split-right .line-info small {
+  font-size: .62rem;
+}
+.layout-row-split-left .status-pill,
+.layout-row-split-right .status-pill {
+  font-size: .6rem;
+  padding: .2rem .5rem;
+  min-height: 22px;
+}
+/* Ligne 3 : Météo pleine largeur */
+.layout-row-weather     { grid-column: 1 / -1; grid-row: 3; }
+/* Ligne 4 : Vélib pleine largeur */
+.layout-row-velib       { grid-column: 1 / -1; grid-row: 4; }
+.layout-default         { grid-column: 1 / -1; }
 
-/* Portrait */
-@media (orientation: portrait) {
+/* Fallback paysage (optionnel) — reprend l'ancienne disposition 3 colonnes */
+@media (orientation: landscape) {
   .dashboard-grid {
-    grid-template-columns: 1fr 1fr;
-    grid-template-rows: auto auto auto auto auto auto;
-    column-gap: var(--gap);
-    row-gap: 0;
+    grid-template-columns: 35fr 32fr 33fr;
+    grid-template-rows: 1fr auto;
   }
-  .section-label                  { grid-column: 1 / -1; grid-row: auto; }
-  .layout-col-left-row-top        { grid-column: span 2; grid-row: auto; }
-  .layout-col-right-row-top-left  { grid-column: span 1; grid-row: auto; }
-  .layout-col-right-row-top-right { grid-column: span 1; grid-row: auto; }
-  .layout-col-left-row-bottom     { grid-column: span 2; grid-row: auto; }
-  .layout-col-right-row-bottom    { grid-column: span 2; grid-row: auto; }
+  .layout-row-main        { grid-column: 1;          grid-row: 1; }
+  .layout-row-split-left  { grid-column: 2;          grid-row: 1; }
+  .layout-row-split-right { grid-column: 3;          grid-row: 1; }
+  .layout-row-weather     { grid-column: 1;          grid-row: 2; align-self: start; }
+  .layout-row-velib       { grid-column: 2 / span 2; grid-row: 2; }
 }
 
 /* ── Card base ── */
@@ -185,8 +218,8 @@ body {
 .passage-dest    { font-size: .9rem; font-weight: 700; }
 .passage-mission { font-family: 'DM Mono', monospace; font-size: .68rem; color: var(--muted); margin-top: .12rem; }
 .passage-time    { text-align: right; }
-.time-main { font-family: 'DM Mono', monospace; font-size: 1.2rem; font-weight: 500; line-height: 1; }
-.time-wait { font-size: .7rem; color: var(--muted); margin-top: .15rem; }
+.time-wait { font-size: 1.2rem; font-weight: 700; color: var(--text); line-height: 1; }
+.time-main { font-family: 'DM Mono', monospace; font-size: .7rem; font-weight: 500; color: var(--muted); margin-top: .15rem; }
 .time-imminent .time-main, .time-imminent .time-wait { color: var(--red) !important; }
 .time-soon     .time-main, .time-soon     .time-wait { color: var(--yellow) !important; }
 
@@ -200,8 +233,8 @@ body {
   border-radius: 8px;
 }
 .passage-item--next .passage-dest { font-size: 1.1rem; }
-.passage-item--next .time-main    { font-size: 2.4rem; font-weight: 700; letter-spacing: .01em; }
-.passage-item--next .time-wait    { font-size: 1rem; font-weight: 500; margin-top: .25rem; }
+.passage-item--next .time-wait    { font-size: 2.4rem; font-weight: 700; letter-spacing: .01em; color: var(--text); }
+.passage-item--next .time-main    { font-size: 1rem; font-weight: 500; margin-top: .25rem; }
 .passage-item--next.time-imminent,
 .passage-item--next .time-imminent { border-left-color: var(--red); }
 
@@ -223,9 +256,23 @@ body {
   padding: .55rem .85rem; font-size: .78rem; color: #c8d060;
 }
 
-.forecast-row { display: flex; gap: .5rem; margin-top: auto; }
+.forecast-row {
+  display: flex;
+  gap: .5rem;
+  margin-top: auto;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  scroll-snap-type: x proximity;
+  padding-bottom: .2rem;
+}
 .forecast-item {
-  flex: 1; display: flex; flex-direction: column; align-items: center; gap: .2rem;
+  /* largeur calculée pour afficher exactement 8 cartes dans la largeur visible
+     (7 espacements "gap" entre les 8 cartes) — ajuste le "8" pour en montrer plus/moins */
+  flex: 0 0 calc((100% - 7 * .5rem) / 8);
+  width: calc((100% - 7 * .5rem) / 8);
+  scroll-snap-align: start;
+  display: flex; flex-direction: column; align-items: center; gap: .2rem;
   background: #0e0e16; border-radius: 10px; padding: .55rem .3rem;
   border: 1px solid var(--border);
 }

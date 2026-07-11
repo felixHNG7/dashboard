@@ -90,8 +90,8 @@ function renderDepartureRow(departure, index) {
         ${missionHtml}
       </div>
       <div class="passage-time">
-        <div class="time-main ${timeClass}">${displayTime}</div>
         <div class="time-wait ${timeClass}">${waitLabel}</div>
+        <div class="time-main ${timeClass}">${displayTime}</div>
       </div>
     </div>`;
 }
@@ -107,6 +107,6 @@ function formatTime(iso) {
 
 function formatWait(minutes) {
   if (minutes < 1)  return 'À quai';
-  if (minutes === 1) return 'dans 1 min';
-  return `dans ${minutes} min`;
+  if (minutes === 1) return '1 min';
+  return `${minutes} min`;
 }

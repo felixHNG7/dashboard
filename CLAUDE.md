@@ -57,7 +57,7 @@ npm start                # Production
 
 ## Layout
 
-Grille CSS fixe en mode portrait (tablette) : 3 colonnes × 5 lignes. Chaque module cible une zone précise via `layout: 'col-left row-top'` etc. dans `config/dashboard.js` ; ces valeurs sont converties en classes `layout-xxx` par `dashboardRenderer.js` et doivent avoir une règle correspondante dans `src/public/css/dashboard.css` (sinon le module tombe dans `.layout-default`, pleine largeur). Zones existantes : `col-left row-top`, `col-right row-top-left`, `col-right row-top-right`, `col-left row-bottom`, `col-right row-bottom`, `row-extra` (pleine largeur, ligne 5 — utilisée par le widget `tempo`).
+Grille CSS en mode portrait (tablette, vertical) par défaut : une seule colonne principale sur 4 lignes. Chaque module cible une zone via `layout: 'row-main'` etc. dans `config/dashboard.js` ; ces valeurs sont converties en classes `layout-xxx` par `dashboardRenderer.js` et doivent avoir une règle correspondante dans `src/public/css/dashboard.css` (sinon le module tombe dans `.layout-default`, pleine largeur). Zones existantes : `row-main` (ligne 1, pleine largeur, occupe le plus de hauteur — RER D), `row-split-left` / `row-split-right` (ligne 2, 2 colonnes égales — Tempo EDF / Métro 9), `row-weather` (ligne 3, pleine largeur), `row-velib` (ligne 4, pleine largeur). L'ordre des modules dans `config/dashboard.js` doit rester cohérent avec l'ordre des lignes (placement automatique de la grille CSS). Un fallback `@media (orientation: landscape)` reprend une disposition 3 colonnes proche de l'ancien design, mais le portrait reste la cible par défaut.
 
 ## Déploiement
 
