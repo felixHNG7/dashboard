@@ -251,6 +251,39 @@ body {
 .weather-detail strong { color: var(--text); }
 .detail-icon { width: 18px; text-align: center; }
 
+.weather-trend {
+  flex: 1;
+  min-width: 0;
+  align-self: stretch;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: .3rem;
+  background: #0e0e16;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: .6rem .8rem;
+}
+.weather-trend-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .5rem;
+}
+.weather-trend-label {
+  font-size: .62rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .07em;
+  color: var(--muted);
+}
+.weather-trend-minmax {
+  font-family: 'DM Mono', monospace;
+  font-size: .68rem;
+  color: var(--text);
+}
+.weather-trend-svg { width: 100%; height: 46px; display: block; }
+
 .weather-rain-alert {
   background: #1a1f0a; border: 1px solid #3a4510; border-radius: 9px;
   padding: .55rem .85rem; font-size: .78rem; color: #c8d060;

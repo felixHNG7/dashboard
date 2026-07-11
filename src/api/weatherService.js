@@ -67,6 +67,7 @@ export async function getWeather(lat, lon) {
   ].join(','));
   url.searchParams.set('hourly', [
     'temperature_2m',
+    'apparent_temperature',
     'precipitation',
     'weather_code',
   ].join(','));
@@ -120,11 +121,12 @@ export async function getWeather(lat, lon) {
     const timeLabel = formatTimeLabel(timeStr);
     const w         = decodeWmo(hourly.weather_code[idx] ?? 0);
     forecasts.push({
-      time:   timeLabel,
-      temp:   Math.round(hourly.temperature_2m[idx] ?? 0),
-      precip: Math.round((hourly.precipitation[idx] ?? 0) * 10) / 10,
-      emoji:  w.emoji,
-      label:  w.label,
+      time:      timeLabel,
+      temp:      Math.round(hourly.temperature_2m[idx] ?? 0),
+      feelsLike: Math.round(hourly.apparent_temperature[idx] ?? 0),
+      precip:    Math.round((hourly.precipitation[idx] ?? 0) * 10) / 10,
+      emoji:     w.emoji,
+      label:     w.label,
     });
   }
 
