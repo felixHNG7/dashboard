@@ -8,9 +8,10 @@
 
 import { getWeather } from '../api/weatherService.js';
 
-const SPARK_W = 200;
-const SPARK_H = 46;
-const SPARK_PAD = 4;
+const SPARK_W     = 200;
+const SPARK_H     = 40;
+const SPARK_PAD   = 4;
+const MARKER_STEP = 4; // un marqueur (point + heure) toutes les 4h
 
 function buildFeelsLikeSparkline(hourly) {
   const values = hourly.map(h => h.feelsLike);
@@ -29,6 +30,20 @@ function buildFeelsLikeSparkline(hourly) {
   const linePath = points.map((p, i) => `${i === 0 ? 'M' : 'L'}${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' ');
   const areaPath = `${linePath} L${points[points.length - 1].x.toFixed(1)},${SPARK_H} L${points[0].x.toFixed(1)},${SPARK_H} Z`;
 
+  const markerIdx = points.map((_, i) => i).filter(i => i % MARKER_STEP === 0);
+
+  const dotsSvg = markerIdx.map(i => `<circle cx="${points[i].x.toFixed(1)}" cy="${points[i].y.toFixed(1)}" r="2.2" fill="var(--blue)" stroke="var(--surface)" stroke-width="1" />`).join('');
+
+  // Étiquettes horaires en HTML (positionnées en %), pas en <text> SVG : le
+  // viewBox est étiré non-uniformément (preserveAspectRatio="none"), ce qui
+  // déformerait des glyphes de texte.
+  const labelsHtml = markerIdx.map(i => {
+    const fraction = i / (values.length - 1);
+    const align = fraction < 0.08 ? 'left' : fraction > 0.92 ? 'right' : 'center';
+    const translateX = align === 'left' ? '0%' : align === 'right' ? '-100%' : '-50%';
+    return `<span class="weather-trend-tick" style="left:${(fraction * 100).toFixed(1)}%; transform: translateX(${translateX});">${hourly[i].time}</span>`;
+  }).join('');
+
   return `
     <div class="weather-trend">
       <div class="weather-trend-header">
@@ -44,7 +59,9 @@ function buildFeelsLikeSparkline(hourly) {
         </defs>
         <path d="${areaPath}" fill="url(#trendFill)" stroke="none" />
         <path d="${linePath}" fill="none" stroke="var(--blue)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" />
+        ${dotsSvg}
       </svg>
+      <div class="weather-trend-ticks">${labelsHtml}</div>
     </div>`;
 }
 
