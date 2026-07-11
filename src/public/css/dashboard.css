@@ -22,7 +22,7 @@
   --red:     #ef4444;
   --blue:    #3b82f6;
   --gap:     14px;
-  --pad:     1rem;
+  --pad:    0.3rem;
   --radius:  16px;
   --touch:   48px;
 }
@@ -146,7 +146,7 @@ body {
   min-height: 22px;
 }
 /* Ligne 3 : Météo pleine largeur */
-.layout-row-weather     { grid-column: 1 / -1; grid-row: 3; }
+.layout-row-weather     { grid-column: 1 / -1; grid-row: 3; min-height: 210px; }
 /* Ligne 4 : Vélib pleine largeur */
 .layout-row-velib       { grid-column: 1 / -1; grid-row: 4; }
 .layout-default         { grid-column: 1 / -1; }
