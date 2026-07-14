@@ -1,0 +1,2 @@
+- [Dashboard grid layout conventions](dashboard_grid_layout.md) — layout string→CSS class mapping, portrait-first, fr-column-split pattern
+- [Header compact modifier pattern](header_compact_modifier_pattern.md) — `--compact` header/badge classes, CSS cascade order gotcha with widget badge classes
